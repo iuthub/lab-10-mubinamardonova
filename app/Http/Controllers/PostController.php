@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Auth;
+use Gate;
 use App\Like;
 use App\Post;
 use App\Tag;
@@ -73,6 +74,10 @@ class PostController extends Controller
         $post = Post::find($request->input('id'));
         $post->title = $request->input('title');
         $post->content = $request->input('content');
+            if(Gate::denies('update-post', $post))
+            {
+                return redirect()->back();
+            }
         $post->save();
 //        $post->tags()->detach();
 //        $post->tags()->attach($request->input('tags') === null ? [] : $request->input('tags'));
@@ -85,6 +90,10 @@ class PostController extends Controller
         $post = Post::find($id);
         $post->likes()->delete();
         $post->tags()->detach();
+        if(Gate::denies('update-post', $post))
+            {
+                return redirect()->back();
+            }
         $post->delete();
         return redirect()->route('admin.index')->with('info', 'Post deleted!');
     }
